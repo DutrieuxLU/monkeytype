@@ -88,7 +88,7 @@ class PseudolangWordGenerator extends Wordset {
       }
       // Pick a random char from the distribution that comes after `prefix`.
       const nextChar = charDistribution.randomChar();
-      if (nextChar == " ") {
+      if (nextChar === " ") {
         // A space marks the end of the word, so stop generating and return.
         break;
       }
@@ -145,7 +145,7 @@ FunboxList.setFunboxFunctions("tts", {
     save("keymapMode", Config.keymapMode, UpdateConfig.setKeymapMode);
   },
   toggleScript(params: string[]): void {
-    if (window.speechSynthesis == undefined) {
+    if (window.speechSynthesis === undefined) {
       Notifications.add("Failed to load text-to-speech script", -1);
       return;
     }
@@ -214,8 +214,6 @@ FunboxList.setFunboxFunctions("arrows", {
   async preventDefaultEvent(
     event: JQuery.KeyDownEvent<Document, null, Document, Document>
   ): Promise<boolean> {
-    // TODO What's better?
-    // return /Arrow/i.test(event.key);
     return ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"].includes(
       event.key
     );
@@ -250,7 +248,7 @@ FunboxList.setFunboxFunctions("rAnDoMcAsE", {
   alterText(word: string): string {
     let randomcaseword = word[0];
     for (let i = 1; i < word.length; i++) {
-      if (randomcaseword[i - 1] == randomcaseword[i - 1].toUpperCase()) {
+      if (randomcaseword[i - 1] === randomcaseword[i - 1].toUpperCase()) {
         randomcaseword += word[i].toLowerCase();
       } else {
         randomcaseword += word[i].toUpperCase();
@@ -305,12 +303,14 @@ FunboxList.setFunboxFunctions("layoutfluid", {
         UpdateConfig.setLayout(layouts[index]);
         UpdateConfig.setKeymapLayout(layouts[index]);
       }
-      KeymapEvent.highlight(
-        TestWords.words
-          .getCurrent()
-          .charAt(TestInput.input.current.length)
-          .toString()
-      );
+      setTimeout(() => {
+        KeymapEvent.highlight(
+          TestWords.words
+            .getCurrent()
+            .charAt(TestInput.input.current.length)
+            .toString()
+        );
+      }, 1);
     }
   },
   getResultContent(): string {
@@ -318,15 +318,17 @@ FunboxList.setFunboxFunctions("layoutfluid", {
   },
   restart(): void {
     if (this.applyConfig) this.applyConfig();
-    KeymapEvent.highlight(
-      TestWords.words
-        .getCurrent()
-        .substring(
-          TestInput.input.current.length,
-          TestInput.input.current.length + 1
-        )
-        .toString()
-    );
+    setTimeout(() => {
+      KeymapEvent.highlight(
+        TestWords.words
+          .getCurrent()
+          .substring(
+            TestInput.input.current.length,
+            TestInput.input.current.length + 1
+          )
+          .toString()
+      );
+    }, 1);
   },
 });
 
@@ -561,7 +563,7 @@ export function setFunbox(funbox: string): boolean {
 }
 
 export function toggleFunbox(funbox: string): boolean {
-  if (funbox == "none") setFunbox("none");
+  if (funbox === "none") setFunbox("none");
   if (
     !areFunboxesCompatible(Config.funbox, funbox) &&
     !Config.funbox.split("#").includes(funbox)
@@ -593,7 +595,7 @@ export async function clear(): Promise<boolean> {
 export async function activate(funbox?: string): Promise<boolean | undefined> {
   if (funbox === undefined || funbox === null) {
     funbox = Config.funbox;
-  } else if (Config.funbox != funbox) {
+  } else if (Config.funbox !== funbox) {
     Config.funbox = funbox;
   }
 
@@ -719,3 +721,9 @@ export async function rememberSettings(): Promise<void> {
     if (funbox.functions?.rememberSettings) funbox.functions.rememberSettings();
   });
 }
+
+FunboxList.setFunboxFunctions("morse", {
+  alterText(word: string): string {
+    return Misc.convertToMorse(word);
+  },
+});

@@ -28,7 +28,7 @@ export function setSelectedId(val: number): void {
   selectedId = val;
 }
 
-const searchServiceCache: Record<string, SearchService<any>> = {};
+const searchServiceCache: Record<string, SearchService<MonkeyTypes.Quote>> = {};
 
 function getSearchService<T>(
   language: string,
@@ -36,11 +36,12 @@ function getSearchService<T>(
   textExtractor: TextExtractor<T>
 ): SearchService<T> {
   if (language in searchServiceCache) {
-    return searchServiceCache[language];
+    return searchServiceCache[language] as unknown as SearchService<T>;
   }
 
   const newSearchService = buildSearchService<T>(data, textExtractor);
-  searchServiceCache[language] = newSearchService;
+  searchServiceCache[language] =
+    newSearchService as unknown as typeof searchServiceCache[typeof language];
 
   return newSearchService;
 }
@@ -408,8 +409,8 @@ $("#popups").on("click", "#quoteSearchPopup #toggleShowFavorites", (e) => {
 });
 
 $(".pageTest").on("click", "#testConfig .quoteLength .textButton", (e) => {
-  const len = $(e.currentTarget).attr("quoteLength") ?? (0 as number);
-  if (len == -2) {
+  const len = parseInt($(e.currentTarget).attr("quoteLength") ?? "0");
+  if (len === -2) {
     show();
   }
 });

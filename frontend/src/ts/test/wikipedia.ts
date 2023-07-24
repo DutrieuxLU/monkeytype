@@ -51,7 +51,7 @@ export async function getSection(language: string): Promise<Section> {
   // get TLD for wikipedia according to language group
   let urlTLD = "en";
 
-  let currentLanguageGroup;
+  let currentLanguageGroup: MonkeyTypes.LanguageGroup | undefined;
   try {
     currentLanguageGroup = await Misc.findCurrentGroup(language);
   } catch (e) {
@@ -69,7 +69,7 @@ export async function getSection(language: string): Promise<Section> {
   const randomPostReq = await fetch(randomPostURL);
   let pageid = 0;
 
-  if (randomPostReq.status == 200) {
+  if (randomPostReq.status === 200) {
     const postObj: Post = await randomPostReq.json();
     sectionObj.title = postObj.title;
     sectionObj.author = postObj.author;
@@ -77,7 +77,7 @@ export async function getSection(language: string): Promise<Section> {
   }
 
   return new Promise((res, rej) => {
-    if (randomPostReq.status != 200) {
+    if (randomPostReq.status !== 200) {
       Loader.hide();
       rej(randomPostReq.status);
     }
@@ -86,8 +86,8 @@ export async function getSection(language: string): Promise<Section> {
 
     const sectionReq = new XMLHttpRequest();
     sectionReq.onload = (): void => {
-      if (sectionReq.readyState == 4) {
-        if (sectionReq.status == 200) {
+      if (sectionReq.readyState === 4) {
+        if (sectionReq.status === 200) {
           let sectionText: string = JSON.parse(sectionReq.responseText).query
             .pages[pageid.toString()].extract;
 
@@ -108,6 +108,10 @@ export async function getSection(language: string): Promise<Section> {
 
           // Removing whitespace before and after text
           sectionText = sectionText.trim();
+
+          if (urlTLD === "en") {
+            sectionText = sectionText.replace(/[^\x20-\x7E]+/g, "");
+          }
 
           const words = sectionText.split(" ");
 
